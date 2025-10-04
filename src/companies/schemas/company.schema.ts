@@ -69,4 +69,3 @@ CompanySchema.add(BaseEntitySchema);
 // Add indexes
 CompanySchema.index({ name: 1 });
 CompanySchema.index({ appName: 1 });
-

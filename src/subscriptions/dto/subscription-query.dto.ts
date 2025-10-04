@@ -65,4 +65,3 @@ export class SubscriptionQueryDto {
   @IsString()
   companyId?: string;
 }
-

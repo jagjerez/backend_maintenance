@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -30,7 +35,10 @@ export class UsersService {
 
     // Hash password
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
 
     const user = new this.userModel({
       ...createUserDto,
@@ -41,31 +49,39 @@ export class UsersService {
   }
 
   async findAll(query: UserQueryDto): Promise<PaginationResult<User>> {
-    const { companyId, role, isActive, emailVerified, ...paginationQuery } = query;
-    
-    let filterQuery: any = this.paginationService.buildSoftDeleteQuery(companyId);
-    
+    const { companyId, role, isActive, emailVerified, ...paginationQuery } =
+      query;
+
+    const filterQuery: any =
+      this.paginationService.buildSoftDeleteQuery(companyId);
+
     if (role) {
       filterQuery.role = role;
     }
-    
+
     if (isActive !== undefined) {
       filterQuery.isActive = isActive;
     }
-    
+
     if (emailVerified !== undefined) {
       filterQuery.emailVerified = emailVerified;
     }
 
-    return this.paginationService.paginate(this.userModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.userModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<UserDocument> {
-    const user = await this.userModel.findOne({
-      _id: id,
-      companyId,
-      deleteAt: { $exists: false },
-    }).select('-password');
+    const user = await this.userModel
+      .findOne({
+        _id: id,
+        companyId,
+        deleteAt: { $exists: false },
+      })
+      .select('-password');
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -81,7 +97,11 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, companyId: string): Promise<User> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    companyId: string,
+  ): Promise<User> {
     // Check if email already exists (if being updated)
     if (updateUserDto.email) {
       const existingUser = await this.userModel.findOne({
@@ -95,11 +115,13 @@ export class UsersService {
       }
     }
 
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: false } },
-      updateUserDto,
-      { new: true },
-    ).select('-password');
+    const user = await this.userModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: false } },
+        updateUserDto,
+        { new: true },
+      )
+      .select('-password');
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -108,7 +130,11 @@ export class UsersService {
     return user;
   }
 
-  async changePassword(id: string, changePasswordDto: ChangePasswordDto, companyId: string): Promise<void> {
+  async changePassword(
+    id: string,
+    changePasswordDto: ChangePasswordDto,
+    companyId: string,
+  ): Promise<void> {
     const user = await this.userModel.findOne({
       _id: id,
       companyId,
@@ -120,14 +146,20 @@ export class UsersService {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      changePasswordDto.currentPassword,
+      user.password,
+    );
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     // Hash new password
     const saltRounds = 10;
-    const hashedNewPassword = await bcrypt.hash(changePasswordDto.newPassword, saltRounds);
+    const hashedNewPassword = await bcrypt.hash(
+      changePasswordDto.newPassword,
+      saltRounds,
+    );
 
     // Update password
     await this.userModel.findByIdAndUpdate(id, { password: hashedNewPassword });
@@ -138,11 +170,13 @@ export class UsersService {
   }
 
   async softDelete(id: string, companyId: string): Promise<User> {
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: false } },
-      { deleteAt: new Date() },
-      { new: true },
-    ).select('-password');
+    const user = await this.userModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: false } },
+        { deleteAt: new Date() },
+        { new: true },
+      )
+      .select('-password');
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -152,11 +186,13 @@ export class UsersService {
   }
 
   async restore(id: string, companyId: string): Promise<User> {
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: true } },
-      { $unset: { deleteAt: 1 } },
-      { new: true },
-    ).select('-password');
+    const user = await this.userModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: true } },
+        { $unset: { deleteAt: 1 } },
+        { new: true },
+      )
+      .select('-password');
 
     if (!user) {
       throw new NotFoundException('User not found or not deleted');
@@ -166,18 +202,23 @@ export class UsersService {
   }
 
   async findDeleted(companyId: string): Promise<User[]> {
-    return this.userModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).select('-password').sort({ deleteAt: -1 });
+    return this.userModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .select('-password')
+      .sort({ deleteAt: -1 });
   }
 
   async verifyEmail(id: string, companyId: string): Promise<User> {
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: false } },
-      { emailVerified: true },
-      { new: true },
-    ).select('-password');
+    const user = await this.userModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: false } },
+        { emailVerified: true },
+        { new: true },
+      )
+      .select('-password');
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -186,4 +227,3 @@ export class UsersService {
     return user;
   }
 }
-

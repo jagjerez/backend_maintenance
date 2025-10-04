@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import { IsEnum, IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { OperationType } from '../schemas/operation.schema';
 
 export class CreateOperationDto {
@@ -45,4 +45,3 @@ export class CreateOperationDto {
   @IsNotEmpty()
   companyId: string;
 }
-

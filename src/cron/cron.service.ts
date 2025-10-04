@@ -12,11 +12,11 @@ export class CronService {
   async handleCron() {
     const cronExpression = this.configService.get<string>('cron.expression');
     const nodeEnv = this.configService.get<string>('nodeEnv');
-    
+
     this.logger.log(`Cron job executed at ${new Date().toISOString()}`);
     this.logger.log(`Environment: ${nodeEnv}`);
     this.logger.log(`Cron expression: ${cronExpression}`);
-    
+
     // Add your cron job logic here
     await this.performScheduledTasks();
   }
@@ -25,13 +25,13 @@ export class CronService {
     try {
       // Example: Clean up old soft-deleted records
       await this.cleanupOldRecords();
-      
+
       // Example: Send scheduled notifications
       await this.sendScheduledNotifications();
-      
+
       // Example: Process pending integration jobs
       await this.processPendingJobs();
-      
+
       this.logger.log('Scheduled tasks completed successfully');
     } catch (error) {
       this.logger.error('Error executing scheduled tasks:', error);
@@ -56,4 +56,3 @@ export class CronService {
     this.logger.log('Processing pending jobs...');
   }
 }
-

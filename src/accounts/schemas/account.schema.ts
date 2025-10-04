@@ -17,4 +17,3 @@ AccountSchema.add(BaseEntitySchema);
 // Add indexes
 AccountSchema.index({ suscriptionId: 1 });
 AccountSchema.index({ companyId: 1 });
-

@@ -1,7 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { IntegrationJobType, IntegrationJobStatus } from '../schemas/integration-job.schema';
+import {
+  IntegrationJobType,
+  IntegrationJobStatus,
+} from '../schemas/integration-job.schema';
 
 class IntegrationJobErrorDto {
   @ApiProperty({
@@ -148,4 +159,3 @@ export class CreateIntegrationJobDto {
   @IsNotEmpty()
   companyId: string;
 }
-

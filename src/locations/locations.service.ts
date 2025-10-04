@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Location, LocationDocument } from './schemas/location.schema';
@@ -23,7 +27,9 @@ export class LocationsService {
     });
 
     if (existingLocation) {
-      throw new ConflictException('Location with this internal code already exists');
+      throw new ConflictException(
+        'Location with this internal code already exists',
+      );
     }
 
     // Calculate path and level if parentId is provided
@@ -31,19 +37,22 @@ export class LocationsService {
     let level = 0;
 
     if (createLocationDto.parentId) {
-      const parent = await this.locationModel.findById(createLocationDto.parentId);
+      const parent = await this.locationModel.findById(
+        createLocationDto.parentId,
+      );
       if (!parent) {
         throw new NotFoundException('Parent location not found');
       }
-      
-      path = parent.path ? `${parent.path}/${createLocationDto.name}` : `/${createLocationDto.name}`;
+
+      path = parent.path
+        ? `${parent.path}/${createLocationDto.name}`
+        : `/${createLocationDto.name}`;
       level = parent.level + 1;
 
       // Update parent's isLeaf status
-      await this.locationModel.findByIdAndUpdate(
-        createLocationDto.parentId,
-        { isLeaf: false }
-      );
+      await this.locationModel.findByIdAndUpdate(createLocationDto.parentId, {
+        isLeaf: false,
+      });
     } else {
       path = `/${createLocationDto.name}`;
     }
@@ -52,7 +61,9 @@ export class LocationsService {
       ...createLocationDto,
       path,
       level,
-      parentId: createLocationDto.parentId ? new Types.ObjectId(createLocationDto.parentId) : null,
+      parentId: createLocationDto.parentId
+        ? new Types.ObjectId(createLocationDto.parentId)
+        : null,
     });
 
     return location.save();
@@ -60,22 +71,27 @@ export class LocationsService {
 
   async findAll(query: LocationQueryDto): Promise<PaginationResult<Location>> {
     const { companyId, parentId, level, isLeaf, ...paginationQuery } = query;
-    
-    let filterQuery: any = this.paginationService.buildSoftDeleteQuery(companyId);
-    
+
+    const filterQuery: any =
+      this.paginationService.buildSoftDeleteQuery(companyId);
+
     if (parentId) {
       filterQuery.parentId = new Types.ObjectId(parentId);
     }
-    
+
     if (level !== undefined) {
       filterQuery.level = level;
     }
-    
+
     if (isLeaf !== undefined) {
       filterQuery.isLeaf = isLeaf;
     }
 
-    return this.paginationService.paginate(this.locationModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.locationModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<Location> {
@@ -93,14 +109,20 @@ export class LocationsService {
   }
 
   async findChildren(id: string, companyId: string): Promise<Location[]> {
-    return this.locationModel.find({
-      parentId: id,
-      companyId,
-      deleteAt: { $exists: false },
-    }).sort({ name: 1 });
+    return this.locationModel
+      .find({
+        parentId: id,
+        companyId,
+        deleteAt: { $exists: false },
+      })
+      .sort({ name: 1 });
   }
 
-  async update(id: string, updateLocationDto: UpdateLocationDto, companyId: string): Promise<Location> {
+  async update(
+    id: string,
+    updateLocationDto: UpdateLocationDto,
+    companyId: string,
+  ): Promise<Location> {
     // Check if internal code already exists (if being updated)
     if (updateLocationDto.internalCode) {
       const existingLocation = await this.locationModel.findOne({
@@ -110,7 +132,9 @@ export class LocationsService {
       });
 
       if (existingLocation) {
-        throw new ConflictException('Location with this internal code already exists');
+        throw new ConflictException(
+          'Location with this internal code already exists',
+        );
       }
     }
 
@@ -136,7 +160,9 @@ export class LocationsService {
     });
 
     if (children.length > 0) {
-      throw new ConflictException('Cannot delete location with children. Delete children first.');
+      throw new ConflictException(
+        'Cannot delete location with children. Delete children first.',
+      );
     }
 
     const location = await this.locationModel.findOneAndUpdate(
@@ -158,10 +184,9 @@ export class LocationsService {
       });
 
       if (remainingChildren === 0) {
-        await this.locationModel.findByIdAndUpdate(
-          location.parentId,
-          { isLeaf: true }
-        );
+        await this.locationModel.findByIdAndUpdate(location.parentId, {
+          isLeaf: true,
+        });
       }
     }
 
@@ -181,20 +206,20 @@ export class LocationsService {
 
     // Update parent's isLeaf status
     if (location.parentId) {
-      await this.locationModel.findByIdAndUpdate(
-        location.parentId,
-        { isLeaf: false }
-      );
+      await this.locationModel.findByIdAndUpdate(location.parentId, {
+        isLeaf: false,
+      });
     }
 
     return location;
   }
 
   async findDeleted(companyId: string): Promise<Location[]> {
-    return this.locationModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).sort({ deleteAt: -1 });
+    return this.locationModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .sort({ deleteAt: -1 });
   }
 }
-

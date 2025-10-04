@@ -2,10 +2,24 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../users/schemas/user.schema';
-import { Company, CompanyDocument } from '../../companies/schemas/company.schema';
-import { Account, AccountDocument } from '../../accounts/schemas/account.schema';
-import { Subscription, SubscriptionDocument } from '../../subscriptions/schemas/subscription.schema';
-import { SessionDto, UserSessionDto, CompanySessionDto, SubscriptionSessionDto } from '../dto/auth-response.dto';
+import {
+  Company,
+  CompanyDocument,
+} from '../../companies/schemas/company.schema';
+import {
+  Account,
+  AccountDocument,
+} from '../../accounts/schemas/account.schema';
+import {
+  Subscription,
+  SubscriptionDocument,
+} from '../../subscriptions/schemas/subscription.schema';
+import {
+  SessionDto,
+  UserSessionDto,
+  CompanySessionDto,
+  SubscriptionSessionDto,
+} from '../dto/auth-response.dto';
 
 @Injectable()
 export class SessionService {
@@ -13,7 +27,8 @@ export class SessionService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Company.name) private companyModel: Model<CompanyDocument>,
     @InjectModel(Account.name) private accountModel: Model<AccountDocument>,
-    @InjectModel(Subscription.name) private subscriptionModel: Model<SubscriptionDocument>,
+    @InjectModel(Subscription.name)
+    private subscriptionModel: Model<SubscriptionDocument>,
   ) {}
 
   async buildSession(userId: string): Promise<SessionDto> {
@@ -86,7 +101,10 @@ export class SessionService {
     };
   }
 
-  async validateUserAccess(userId: string, companyId: string): Promise<boolean> {
+  async validateUserAccess(
+    userId: string,
+    companyId: string,
+  ): Promise<boolean> {
     const user = await this.userModel.findOne({
       _id: userId,
       companyId,
@@ -97,10 +115,7 @@ export class SessionService {
   }
 
   async getUserPermissions(userId: string): Promise<string[]> {
-    const user = await this.userModel
-      .findById(userId)
-      .select('role')
-      .lean();
+    const user = await this.userModel.findById(userId).select('role').lean();
 
     if (!user) {
       return [];
@@ -138,7 +153,10 @@ export class SessionService {
     return permissions[user.role] || [];
   }
 
-  async checkEntityLimit(companyId: string, entity: string): Promise<{ allowed: boolean; limit: number; current: number }> {
+  async checkEntityLimit(
+    companyId: string,
+    entity: string,
+  ): Promise<{ allowed: boolean; limit: number; current: number }> {
     // Get account with subscription
     const account = await this.accountModel
       .findOne({ companyId, deleteAt: { $exists: false } })
@@ -158,7 +176,9 @@ export class SessionService {
       return { allowed: false, limit: 0, current: 0 };
     }
 
-    const entitySetting = subscription.settings.find(s => s.entity === entity);
+    const entitySetting = subscription.settings.find(
+      (s) => s.entity === entity,
+    );
     if (!entitySetting) {
       return { allowed: true, limit: -1, current: 0 }; // No limit
     }

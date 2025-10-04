@@ -16,10 +16,12 @@ export class Subscription extends BaseEntity {
   description?: string;
 
   @Prop({
-    type: [{
-      entity: { type: String, required: true },
-      createLimitRegistry: { type: Number, required: true },
-    }],
+    type: [
+      {
+        entity: { type: String, required: true },
+        createLimitRegistry: { type: Number, required: true },
+      },
+    ],
     default: [],
   })
   settings: SubscriptionSetting[];
@@ -33,4 +35,3 @@ SubscriptionSchema.add(BaseEntitySchema);
 
 // Add indexes
 SubscriptionSchema.index({ name: 1 });
-

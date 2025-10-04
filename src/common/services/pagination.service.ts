@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Model, FilterQuery } from 'mongoose';
-import { PaginationQuery, PaginationResult, PaginationOptions } from '../interfaces/pagination.interface';
+import {
+  PaginationQuery,
+  PaginationResult,
+  PaginationOptions,
+} from '../interfaces/pagination.interface';
 
 @Injectable()
 export class PaginationService {
@@ -48,12 +52,7 @@ export class PaginationService {
 
     // Execute queries in parallel
     const [data, total] = await Promise.all([
-      model
-        .find(searchQuery)
-        .sort(sort)
-        .skip(skip)
-        .limit(options.limit)
-        .exec(),
+      model.find(searchQuery).sort(sort).skip(skip).limit(options.limit).exec(),
       model.countDocuments(searchQuery).exec(),
     ]);
 
@@ -75,18 +74,20 @@ export class PaginationService {
     };
   }
 
-  buildSoftDeleteQuery(companyId?: string, includeDeleted = false): FilterQuery<any> {
+  buildSoftDeleteQuery(
+    companyId?: string,
+    includeDeleted = false,
+  ): FilterQuery<any> {
     const query: FilterQuery<any> = {};
-    
+
     if (companyId) {
       query.companyId = companyId;
     }
-    
+
     if (!includeDeleted) {
       query.deleteAt = { $exists: false };
     }
-    
+
     return query;
   }
 }
-

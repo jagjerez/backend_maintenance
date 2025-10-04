@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Operation, OperationDocument } from './schemas/operation.schema';
@@ -11,7 +15,8 @@ import { PaginationResult } from '../common/interfaces/pagination.interface';
 @Injectable()
 export class OperationsService {
   constructor(
-    @InjectModel(Operation.name) private operationModel: Model<OperationDocument>,
+    @InjectModel(Operation.name)
+    private operationModel: Model<OperationDocument>,
     private paginationService: PaginationService,
   ) {}
 
@@ -23,23 +28,32 @@ export class OperationsService {
     });
 
     if (existingOperation) {
-      throw new ConflictException('Operation with this internal code already exists');
+      throw new ConflictException(
+        'Operation with this internal code already exists',
+      );
     }
 
     const operation = new this.operationModel(createOperationDto);
     return operation.save();
   }
 
-  async findAll(query: OperationQueryDto): Promise<PaginationResult<Operation>> {
+  async findAll(
+    query: OperationQueryDto,
+  ): Promise<PaginationResult<Operation>> {
     const { companyId, type, ...paginationQuery } = query;
-    
-    let filterQuery: any = this.paginationService.buildSoftDeleteQuery(companyId);
-    
+
+    const filterQuery: any =
+      this.paginationService.buildSoftDeleteQuery(companyId);
+
     if (type) {
       filterQuery.type = type;
     }
 
-    return this.paginationService.paginate(this.operationModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.operationModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<Operation> {
@@ -56,7 +70,11 @@ export class OperationsService {
     return operation;
   }
 
-  async update(id: string, updateOperationDto: UpdateOperationDto, companyId: string): Promise<Operation> {
+  async update(
+    id: string,
+    updateOperationDto: UpdateOperationDto,
+    companyId: string,
+  ): Promise<Operation> {
     // Check if internal code already exists (if being updated)
     if (updateOperationDto.internalCode) {
       const existingOperation = await this.operationModel.findOne({
@@ -66,7 +84,9 @@ export class OperationsService {
       });
 
       if (existingOperation) {
-        throw new ConflictException('Operation with this internal code already exists');
+        throw new ConflictException(
+          'Operation with this internal code already exists',
+        );
       }
     }
 
@@ -112,10 +132,11 @@ export class OperationsService {
   }
 
   async findDeleted(companyId: string): Promise<Operation[]> {
-    return this.operationModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).sort({ deleteAt: -1 });
+    return this.operationModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .sort({ deleteAt: -1 });
   }
 }
-

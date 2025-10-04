@@ -44,4 +44,3 @@ LocationSchema.index({ parentId: 1 });
 LocationSchema.index({ path: 1 });
 LocationSchema.index({ level: 1 });
 LocationSchema.index({ isLeaf: 1 });
-

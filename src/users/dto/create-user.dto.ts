@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, IsNotEmpty, IsOptional, IsEnum, IsBoolean, IsObject, ValidateNested } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserRole } from '../schemas/user.schema';
 
@@ -114,4 +123,3 @@ export class CreateUserDto {
   @IsNotEmpty()
   companyId: string;
 }
-

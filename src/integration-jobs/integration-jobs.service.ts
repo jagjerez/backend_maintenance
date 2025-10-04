@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IntegrationJob, IntegrationJobDocument, IntegrationJobStatus } from './schemas/integration-job.schema';
+import {
+  IntegrationJob,
+  IntegrationJobDocument,
+  IntegrationJobStatus,
+} from './schemas/integration-job.schema';
 import { CreateIntegrationJobDto } from './dto/create-integration-job.dto';
 import { UpdateIntegrationJobDto } from './dto/update-integration-job.dto';
 import { IntegrationJobQueryDto } from './dto/integration-job-query.dto';
@@ -11,29 +15,41 @@ import { PaginationResult } from '../common/interfaces/pagination.interface';
 @Injectable()
 export class IntegrationJobsService {
   constructor(
-    @InjectModel(IntegrationJob.name) private integrationJobModel: Model<IntegrationJobDocument>,
+    @InjectModel(IntegrationJob.name)
+    private integrationJobModel: Model<IntegrationJobDocument>,
     private paginationService: PaginationService,
   ) {}
 
-  async create(createIntegrationJobDto: CreateIntegrationJobDto): Promise<IntegrationJob> {
-    const integrationJob = new this.integrationJobModel(createIntegrationJobDto);
+  async create(
+    createIntegrationJobDto: CreateIntegrationJobDto,
+  ): Promise<IntegrationJob> {
+    const integrationJob = new this.integrationJobModel(
+      createIntegrationJobDto,
+    );
     return integrationJob.save();
   }
 
-  async findAll(query: IntegrationJobQueryDto): Promise<PaginationResult<IntegrationJob>> {
+  async findAll(
+    query: IntegrationJobQueryDto,
+  ): Promise<PaginationResult<IntegrationJob>> {
     const { companyId, type, status, ...paginationQuery } = query;
-    
-    let filterQuery: any = this.paginationService.buildSoftDeleteQuery(companyId);
-    
+
+    const filterQuery: any =
+      this.paginationService.buildSoftDeleteQuery(companyId);
+
     if (type) {
       filterQuery.type = type;
     }
-    
+
     if (status) {
       filterQuery.status = status;
     }
 
-    return this.paginationService.paginate(this.integrationJobModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.integrationJobModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<IntegrationJob> {
@@ -50,7 +66,11 @@ export class IntegrationJobsService {
     return integrationJob;
   }
 
-  async update(id: string, updateIntegrationJobDto: UpdateIntegrationJobDto, companyId: string): Promise<IntegrationJob> {
+  async update(
+    id: string,
+    updateIntegrationJobDto: UpdateIntegrationJobDto,
+    companyId: string,
+  ): Promise<IntegrationJob> {
     const integrationJob = await this.integrationJobModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
       updateIntegrationJobDto,
@@ -64,9 +84,13 @@ export class IntegrationJobsService {
     return integrationJob;
   }
 
-  async updateStatus(id: string, status: IntegrationJobStatus, companyId: string): Promise<IntegrationJob> {
+  async updateStatus(
+    id: string,
+    status: IntegrationJobStatus,
+    companyId: string,
+  ): Promise<IntegrationJob> {
     const updateData: any = { status };
-    
+
     if (status === IntegrationJobStatus.COMPLETED) {
       updateData.completedAt = new Date();
     }
@@ -85,20 +109,20 @@ export class IntegrationJobsService {
   }
 
   async updateProgress(
-    id: string, 
-    processedRows: number, 
-    successRows: number, 
-    errorRows: number, 
+    id: string,
+    processedRows: number,
+    successRows: number,
+    errorRows: number,
     limitedRows: number,
-    companyId: string
+    companyId: string,
   ): Promise<IntegrationJob> {
     const integrationJob = await this.integrationJobModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
-      { 
-        processedRows, 
-        successRows, 
-        errorRows, 
-        limitedRows 
+      {
+        processedRows,
+        successRows,
+        errorRows,
+        limitedRows,
       },
       { new: true },
     );
@@ -110,7 +134,11 @@ export class IntegrationJobsService {
     return integrationJob;
   }
 
-  async addError(id: string, error: any, companyId: string): Promise<IntegrationJob> {
+  async addError(
+    id: string,
+    error: any,
+    companyId: string,
+  ): Promise<IntegrationJob> {
     const integrationJob = await this.integrationJobModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
       { $push: { errors: error } },
@@ -153,10 +181,12 @@ export class IntegrationJobsService {
   }
 
   async findDeleted(companyId: string): Promise<IntegrationJob[]> {
-    return this.integrationJobModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).sort({ deleteAt: -1 });
+    return this.integrationJobModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .sort({ deleteAt: -1 });
   }
 
   async getJobStats(companyId: string): Promise<any> {
@@ -177,4 +207,3 @@ export class IntegrationJobsService {
     return stats;
   }
 }
-

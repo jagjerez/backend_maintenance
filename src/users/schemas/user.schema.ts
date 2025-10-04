@@ -19,10 +19,10 @@ export class User extends BaseEntity {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: Object.values(UserRole),
-    default: UserRole.USER 
+    default: UserRole.USER,
   })
   role: UserRole;
 
@@ -75,4 +75,3 @@ UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1 });
 UserSchema.index({ emailVerified: 1 });
 UserSchema.index({ lastLogin: -1 });
-

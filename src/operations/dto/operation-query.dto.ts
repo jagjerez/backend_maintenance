@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { OperationType } from '../schemas/operation.schema';
 
@@ -76,4 +83,3 @@ export class OperationQueryDto {
   @IsString()
   companyId?: string;
 }
-

@@ -19,8 +19,8 @@ export class AppController {
   @Public()
   @Get('health')
   @ApiOperation({ summary: 'Health check endpoint' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Application health status',
     schema: {
       type: 'object',

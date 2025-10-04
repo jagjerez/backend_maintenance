@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,26 +14,32 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('jwt.secret'),
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: any) {
+  async validate(req: any, payload: any) {
     try {
-      // Validate the token and get user data
-      const user = await this.authService.validateToken(payload);
-      
+      // Extraer el token del header Authorization
+      const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
+      if (!token) {
+        throw new UnauthorizedException('No token provided');
+      }
+
+      // Verificar el token contra el servidor OAuth2
+      const user = await this.authService.validateToken(token);
+
       if (!user) {
         throw new UnauthorizedException('Invalid token');
       }
 
-      return {
-        userId: user.sub,
-        email: user.email,
-        companyId: user.companyId,
-        role: user.role,
-      };
+      // Agregar información del usuario al request
+      req.user = user;
+
+      return user;
     } catch (error) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Token validation failed');
     }
   }
 }

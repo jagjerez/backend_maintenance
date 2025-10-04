@@ -8,19 +8,19 @@ import { Reflector } from '@nestjs/core';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class RolesGuard implements CanActivate {
+export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+      'permissions',
+      [context.getHandler(), context.getClass()],
+    );
 
-    if (!requiredRoles) {
+    if (!requiredPermissions) {
       return true;
     }
 
@@ -41,13 +41,13 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('No token provided');
     }
 
-    const hasRoles = await this.authService.checkUserRoles(
+    const hasPermissions = await this.authService.checkUserPermissions(
       token,
-      requiredRoles,
+      requiredPermissions,
     );
 
-    if (!hasRoles) {
-      throw new ForbiddenException('Insufficient roles');
+    if (!hasPermissions) {
+      throw new ForbiddenException('Insufficient permissions');
     }
 
     return true;

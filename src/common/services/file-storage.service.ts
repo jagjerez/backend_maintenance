@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileStorageProvider, FileUploadResult, MulterFile } from '../interfaces/file-storage.interface';
+import {
+  FileStorageProvider,
+  FileUploadResult,
+  MulterFile,
+} from '../interfaces/file-storage.interface';
 import { MinioStorageService } from './minio-storage.service';
 import { VercelStorageService } from './vercel-storage.service';
 
@@ -19,7 +23,7 @@ export class FileStorageService implements FileStorageProvider {
 
   private initializeProvider() {
     const storageType = this.configService.get<string>('storage.type');
-    
+
     switch (storageType) {
       case 'minio':
         this.provider = this.minioStorageService;
@@ -31,7 +35,9 @@ export class FileStorageService implements FileStorageProvider {
         break;
       default:
         this.provider = this.minioStorageService;
-        this.logger.warn(`Unknown storage type: ${storageType}, defaulting to MinIO`);
+        this.logger.warn(
+          `Unknown storage type: ${storageType}, defaulting to MinIO`,
+        );
     }
   }
 
@@ -50,4 +56,3 @@ export class FileStorageService implements FileStorageProvider {
     return this.provider.getFileUrl(key);
   }
 }
-

@@ -5,6 +5,8 @@ A comprehensive NestJS backend application with MongoDB, file storage, cron jobs
 ## 🚀 Features
 
 - **NestJS Framework** - Latest stable version with TypeScript
+- **OAuth2 Authentication** - JWT token validation against external OAuth2 server
+- **Role-based Authorization** - Granular permissions and roles system
 - **MongoDB** - With Mongoose ODM for data persistence
 - **File Storage** - MinIO for local development, Vercel for production
 - **Environment Configuration** - Comprehensive environment variable management
@@ -130,6 +132,29 @@ Once the application is running, visit:
 - **Swagger UI**: http://localhost:3000/api
 - **API Base URL**: http://localhost:3000
 
+## 🔐 Authentication
+
+This application uses OAuth2 authentication with JWT tokens. All routes are protected by default.
+
+### Getting Started with Authentication
+
+1. **Get a token** from your OAuth2 server at https://oauth2-application.vercel.app/
+2. **Include the token** in your requests:
+   ```bash
+   curl -X GET http://localhost:3000/operations \
+     -H "Authorization: Bearer YOUR_JWT_TOKEN"
+   ```
+
+### Public Endpoints
+
+- `GET /` - Application status
+- `GET /health` - Health check
+- `POST /auth/verify-token` - Verify JWT token
+
+### Protected Endpoints
+
+All other endpoints require authentication. See [AUTHENTICATION.md](./AUTHENTICATION.md) for detailed information.
+
 ## 🗄️ Database Setup
 
 ### MongoDB
@@ -205,11 +230,14 @@ src/
 
 ## 🔐 Security Features
 
-- Password hashing with bcrypt
-- Input validation with class-validator
-- CORS configuration
-- Environment-based configuration
-- Soft delete for data integrity
+- **OAuth2 Integration** - JWT token validation against external OAuth2 server
+- **Role-based Access Control** - Granular permissions and roles system
+- **Global Authentication** - All routes protected by default
+- **Password hashing** - bcrypt for secure password storage
+- **Input validation** - class-validator for request validation
+- **CORS configuration** - Secure cross-origin requests
+- **Environment-based configuration** - Secure configuration management
+- **Soft delete** - Data integrity with soft delete functionality
 
 ## 📊 Features by Module
 

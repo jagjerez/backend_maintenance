@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -21,7 +26,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<UserDocument> {
     const user = await this.usersService.findByEmail(email);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -43,10 +48,12 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.validateUser(loginDto.email, loginDto.password);
-    
+
     // Build session data
-    const session = await this.sessionService.buildSession((user._id as any).toString());
-    
+    const session = await this.sessionService.buildSession(
+      (user._id as any).toString(),
+    );
+
     // Generate tokens
     const payload = {
       sub: (user._id as any).toString(),
@@ -91,8 +98,10 @@ export class AuthService {
     });
 
     // Build session data
-    const session = await this.sessionService.buildSession((user._id as any).toString());
-    
+    const session = await this.sessionService.buildSession(
+      (user._id as any).toString(),
+    );
+
     // Generate tokens
     const payload = {
       sub: (user._id as any).toString(),
@@ -120,23 +129,30 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<AuthResponseDto> {
+  async refreshToken(
+    refreshTokenDto: RefreshTokenDto,
+  ): Promise<AuthResponseDto> {
     try {
       const payload = this.jwtService.verify(refreshTokenDto.refreshToken);
-      
+
       if (payload.type !== 'refresh') {
         throw new UnauthorizedException('Invalid token type');
       }
 
-      const user = await this.usersService.findOne(payload.sub, payload.companyId);
-      
+      const user = await this.usersService.findOne(
+        payload.sub,
+        payload.companyId,
+      );
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
 
       // Build session data
-      const session = await this.sessionService.buildSession((user._id as any).toString());
-      
+      const session = await this.sessionService.buildSession(
+        (user._id as any).toString(),
+      );
+
       // Generate new tokens
       const newPayload = {
         sub: (user._id as any).toString(),
@@ -176,7 +192,7 @@ export class AuthService {
   async getProfile(userId: string, companyId: string): Promise<any> {
     const user = await this.usersService.findOne(userId, companyId);
     const session = await this.sessionService.buildSession(userId);
-    
+
     return {
       user: session.user,
       company: session.company,
@@ -184,18 +200,27 @@ export class AuthService {
     };
   }
 
-  async changePassword(userId: string, currentPassword: string, newPassword: string, companyId: string): Promise<{ message: string }> {
-    await this.usersService.changePassword(userId, {
-      currentPassword,
-      newPassword,
-    }, companyId);
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    companyId: string,
+  ): Promise<{ message: string }> {
+    await this.usersService.changePassword(
+      userId,
+      {
+        currentPassword,
+        newPassword,
+      },
+      companyId,
+    );
 
     return { message: 'Password changed successfully' };
   }
 
   private getTokenExpirationTime(): number {
     const expiresIn = this.configService.get<string>('jwt.expiresIn') || '24h';
-    
+
     // Parse expiration time (e.g., "24h" -> 86400 seconds)
     if (expiresIn.endsWith('h')) {
       return parseInt(expiresIn) * 3600;
@@ -211,7 +236,7 @@ export class AuthService {
   async validateToken(token: string): Promise<any> {
     try {
       const payload = this.jwtService.verify(token);
-      
+
       if (payload.type === 'refresh') {
         throw new UnauthorizedException('Invalid token type');
       }

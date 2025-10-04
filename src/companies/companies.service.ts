@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
@@ -42,10 +46,14 @@ export class CompaniesService {
 
   async findAll(query: CompanyQueryDto): Promise<PaginationResult<Company>> {
     const { companyId, ...paginationQuery } = query;
-    
+
     const filterQuery = this.paginationService.buildSoftDeleteQuery(companyId);
 
-    return this.paginationService.paginate(this.companyModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.companyModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<Company> {
@@ -62,7 +70,11 @@ export class CompaniesService {
     return company;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, companyId: string): Promise<Company> {
+  async update(
+    id: string,
+    updateCompanyDto: UpdateCompanyDto,
+    companyId: string,
+  ): Promise<Company> {
     // Check if company with same name already exists (if being updated)
     if (updateCompanyDto.name) {
       const existingCompany = await this.companyModel.findOne({
@@ -118,13 +130,19 @@ export class CompaniesService {
   }
 
   async findDeleted(companyId: string): Promise<Company[]> {
-    return this.companyModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).sort({ deleteAt: -1 });
+    return this.companyModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .sort({ deleteAt: -1 });
   }
 
-  async updateBranding(id: string, branding: any, companyId: string): Promise<Company> {
+  async updateBranding(
+    id: string,
+    branding: any,
+    companyId: string,
+  ): Promise<Company> {
     const company = await this.companyModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
       { branding },
@@ -138,7 +156,11 @@ export class CompaniesService {
     return company;
   }
 
-  async updateSettings(id: string, settings: any, companyId: string): Promise<Company> {
+  async updateSettings(
+    id: string,
+    settings: any,
+    companyId: string,
+  ): Promise<Company> {
     const company = await this.companyModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
       { settings },
@@ -152,4 +174,3 @@ export class CompaniesService {
     return company;
   }
 }
-

@@ -18,4 +18,3 @@ export class CreateAccountDto {
   @IsNotEmpty()
   companyId: string;
 }
-

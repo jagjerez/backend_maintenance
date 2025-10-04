@@ -1,7 +1,14 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Subscription, SubscriptionDocument } from './schemas/subscription.schema';
+import {
+  Subscription,
+  SubscriptionDocument,
+} from './schemas/subscription.schema';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SubscriptionQueryDto } from './dto/subscription-query.dto';
@@ -11,11 +18,14 @@ import { PaginationResult } from '../common/interfaces/pagination.interface';
 @Injectable()
 export class SubscriptionsService {
   constructor(
-    @InjectModel(Subscription.name) private subscriptionModel: Model<SubscriptionDocument>,
+    @InjectModel(Subscription.name)
+    private subscriptionModel: Model<SubscriptionDocument>,
     private paginationService: PaginationService,
   ) {}
 
-  async create(createSubscriptionDto: CreateSubscriptionDto): Promise<Subscription> {
+  async create(
+    createSubscriptionDto: CreateSubscriptionDto,
+  ): Promise<Subscription> {
     // Check if subscription with same name already exists
     const existingSubscription = await this.subscriptionModel.findOne({
       name: createSubscriptionDto.name,
@@ -30,12 +40,18 @@ export class SubscriptionsService {
     return subscription.save();
   }
 
-  async findAll(query: SubscriptionQueryDto): Promise<PaginationResult<Subscription>> {
+  async findAll(
+    query: SubscriptionQueryDto,
+  ): Promise<PaginationResult<Subscription>> {
     const { companyId, ...paginationQuery } = query;
-    
+
     const filterQuery = this.paginationService.buildSoftDeleteQuery(companyId);
 
-    return this.paginationService.paginate(this.subscriptionModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.subscriptionModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<Subscription> {
@@ -52,7 +68,11 @@ export class SubscriptionsService {
     return subscription;
   }
 
-  async update(id: string, updateSubscriptionDto: UpdateSubscriptionDto, companyId: string): Promise<Subscription> {
+  async update(
+    id: string,
+    updateSubscriptionDto: UpdateSubscriptionDto,
+    companyId: string,
+  ): Promise<Subscription> {
     // Check if subscription with same name already exists (if being updated)
     if (updateSubscriptionDto.name) {
       const existingSubscription = await this.subscriptionModel.findOne({
@@ -62,7 +82,9 @@ export class SubscriptionsService {
       });
 
       if (existingSubscription) {
-        throw new ConflictException('Subscription with this name already exists');
+        throw new ConflictException(
+          'Subscription with this name already exists',
+        );
       }
     }
 
@@ -108,13 +130,19 @@ export class SubscriptionsService {
   }
 
   async findDeleted(companyId: string): Promise<Subscription[]> {
-    return this.subscriptionModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).sort({ deleteAt: -1 });
+    return this.subscriptionModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .sort({ deleteAt: -1 });
   }
 
-  async updateSettings(id: string, settings: any[], companyId: string): Promise<Subscription> {
+  async updateSettings(
+    id: string,
+    settings: any[],
+    companyId: string,
+  ): Promise<Subscription> {
     const subscription = await this.subscriptionModel.findOneAndUpdate(
       { _id: id, companyId, deleteAt: { $exists: false } },
       { settings },
@@ -128,15 +156,17 @@ export class SubscriptionsService {
     return subscription;
   }
 
-  async getEntityLimit(subscriptionId: string, entity: string): Promise<number | null> {
+  async getEntityLimit(
+    subscriptionId: string,
+    entity: string,
+  ): Promise<number | null> {
     const subscription = await this.subscriptionModel.findById(subscriptionId);
-    
+
     if (!subscription) {
       return null;
     }
 
-    const setting = subscription.settings.find(s => s.entity === entity);
+    const setting = subscription.settings.find((s) => s.entity === entity);
     return setting ? setting.createLimitRegistry : null;
   }
 }
-

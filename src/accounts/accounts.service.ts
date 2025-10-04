@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Account, AccountDocument } from './schemas/account.schema';
@@ -36,22 +40,29 @@ export class AccountsService {
 
   async findAll(query: AccountQueryDto): Promise<PaginationResult<Account>> {
     const { companyId, suscriptionId, ...paginationQuery } = query;
-    
-    let filterQuery: any = this.paginationService.buildSoftDeleteQuery(companyId);
-    
+
+    const filterQuery: any =
+      this.paginationService.buildSoftDeleteQuery(companyId);
+
     if (suscriptionId) {
       filterQuery.suscriptionId = new Types.ObjectId(suscriptionId);
     }
 
-    return this.paginationService.paginate(this.accountModel, filterQuery, paginationQuery);
+    return this.paginationService.paginate(
+      this.accountModel,
+      filterQuery,
+      paginationQuery,
+    );
   }
 
   async findOne(id: string, companyId: string): Promise<Account> {
-    const account = await this.accountModel.findOne({
-      _id: id,
-      companyId,
-      deleteAt: { $exists: false },
-    }).populate('suscriptionId');
+    const account = await this.accountModel
+      .findOne({
+        _id: id,
+        companyId,
+        deleteAt: { $exists: false },
+      })
+      .populate('suscriptionId');
 
     if (!account) {
       throw new NotFoundException('Account not found');
@@ -61,13 +72,19 @@ export class AccountsService {
   }
 
   async findByCompanyId(companyId: string): Promise<Account | null> {
-    return this.accountModel.findOne({
-      companyId,
-      deleteAt: { $exists: false },
-    }).populate('suscriptionId');
+    return this.accountModel
+      .findOne({
+        companyId,
+        deleteAt: { $exists: false },
+      })
+      .populate('suscriptionId');
   }
 
-  async update(id: string, updateAccountDto: UpdateAccountDto, companyId: string): Promise<Account> {
+  async update(
+    id: string,
+    updateAccountDto: UpdateAccountDto,
+    companyId: string,
+  ): Promise<Account> {
     // Check if account already exists for this company (if being updated)
     if (updateAccountDto.companyId) {
       const existingAccount = await this.accountModel.findOne({
@@ -83,14 +100,18 @@ export class AccountsService {
 
     const updateData: any = { ...updateAccountDto };
     if (updateAccountDto.suscriptionId) {
-      updateData.suscriptionId = new Types.ObjectId(updateAccountDto.suscriptionId);
+      updateData.suscriptionId = new Types.ObjectId(
+        updateAccountDto.suscriptionId,
+      );
     }
 
-    const account = await this.accountModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: false } },
-      updateData,
-      { new: true },
-    ).populate('suscriptionId');
+    const account = await this.accountModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: false } },
+        updateData,
+        { new: true },
+      )
+      .populate('suscriptionId');
 
     if (!account) {
       throw new NotFoundException('Account not found');
@@ -114,11 +135,13 @@ export class AccountsService {
   }
 
   async restore(id: string, companyId: string): Promise<Account> {
-    const account = await this.accountModel.findOneAndUpdate(
-      { _id: id, companyId, deleteAt: { $exists: true } },
-      { $unset: { deleteAt: 1 } },
-      { new: true },
-    ).populate('suscriptionId');
+    const account = await this.accountModel
+      .findOneAndUpdate(
+        { _id: id, companyId, deleteAt: { $exists: true } },
+        { $unset: { deleteAt: 1 } },
+        { new: true },
+      )
+      .populate('suscriptionId');
 
     if (!account) {
       throw new NotFoundException('Account not found or not deleted');
@@ -128,10 +151,12 @@ export class AccountsService {
   }
 
   async findDeleted(companyId: string): Promise<Account[]> {
-    return this.accountModel.find({
-      companyId,
-      deleteAt: { $exists: true },
-    }).populate('suscriptionId').sort({ deleteAt: -1 });
+    return this.accountModel
+      .find({
+        companyId,
+        deleteAt: { $exists: true },
+      })
+      .populate('suscriptionId')
+      .sort({ deleteAt: -1 });
   }
 }
-

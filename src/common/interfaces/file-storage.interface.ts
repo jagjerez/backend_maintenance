@@ -15,13 +15,9 @@ export interface MulterFile {
 }
 
 export interface FileStorageProvider {
-  uploadFile(
-    file: MulterFile,
-    folder?: string,
-  ): Promise<FileUploadResult>;
-  
+  uploadFile(file: MulterFile, folder?: string): Promise<FileUploadResult>;
+
   deleteFile(key: string): Promise<void>;
-  
+
   getFileUrl(key: string): Promise<string>;
 }
-

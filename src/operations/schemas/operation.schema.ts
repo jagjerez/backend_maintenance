@@ -13,10 +13,10 @@ export enum OperationType {
 
 @Schema({ collection: 'operations' })
 export class Operation extends BaseEntity {
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: Object.values(OperationType),
-    required: true 
+    required: true,
   })
   type: OperationType;
 
@@ -40,4 +40,3 @@ OperationSchema.add(BaseEntitySchema);
 OperationSchema.index({ internalCode: 1 });
 OperationSchema.index({ type: 1 });
 OperationSchema.index({ name: 1 });
-

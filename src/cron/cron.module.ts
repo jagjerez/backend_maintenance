@@ -4,12 +4,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './cron.service';
 
 @Module({
-  imports: [
-    ConfigModule,
-    ScheduleModule.forRoot(),
-  ],
+  imports: [ConfigModule, ScheduleModule.forRoot()],
   providers: [CronService],
   exports: [CronService],
 })
 export class CronModule {}
-

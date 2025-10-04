@@ -1,7 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
-import { IntegrationJobType, IntegrationJobStatus } from '../schemas/integration-job.schema';
+import {
+  IntegrationJobType,
+  IntegrationJobStatus,
+} from '../schemas/integration-job.schema';
 
 export class IntegrationJobQueryDto {
   @ApiProperty({
@@ -84,4 +94,3 @@ export class IntegrationJobQueryDto {
   @IsString()
   companyId?: string;
 }
-

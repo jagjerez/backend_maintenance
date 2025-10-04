@@ -25,17 +25,17 @@ export interface IntegrationJobError {
 
 @Schema({ collection: 'integration_jobs' })
 export class IntegrationJob extends BaseEntity {
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: Object.values(IntegrationJobType),
-    required: true 
+    required: true,
   })
   type: IntegrationJobType;
 
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     enum: Object.values(IntegrationJobStatus),
-    default: IntegrationJobStatus.PENDING 
+    default: IntegrationJobStatus.PENDING,
   })
   status: IntegrationJobStatus;
 
@@ -64,12 +64,14 @@ export class IntegrationJob extends BaseEntity {
   limitedRows: number;
 
   @Prop({
-    type: [{
-      row: { type: Number, required: true },
-      field: { type: String, required: true },
-      value: { type: String, required: true },
-      message: { type: String, required: true },
-    }],
+    type: [
+      {
+        row: { type: Number, required: true },
+        field: { type: String, required: true },
+        value: { type: String, required: true },
+        message: { type: String, required: true },
+      },
+    ],
     default: [],
   })
   errors: IntegrationJobError[];
@@ -79,7 +81,8 @@ export class IntegrationJob extends BaseEntity {
 }
 
 export type IntegrationJobDocument = IntegrationJob & Document;
-export const IntegrationJobSchema = SchemaFactory.createForClass(IntegrationJob);
+export const IntegrationJobSchema =
+  SchemaFactory.createForClass(IntegrationJob);
 
 // Add the base schema fields
 IntegrationJobSchema.add(BaseEntitySchema);
@@ -89,4 +92,3 @@ IntegrationJobSchema.index({ type: 1 });
 IntegrationJobSchema.index({ status: 1 });
 IntegrationJobSchema.index({ completedAt: -1 });
 IntegrationJobSchema.index({ createdAt: -1 });
-

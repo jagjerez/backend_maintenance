@@ -18,4 +18,3 @@ BaseEntitySchema.index({ companyId: 1 });
 BaseEntitySchema.index({ deleteAt: 1 });
 BaseEntitySchema.index({ createdAt: -1 });
 BaseEntitySchema.index({ updatedAt: -1 });
-

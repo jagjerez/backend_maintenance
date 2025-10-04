@@ -24,4 +24,3 @@ export interface PaginationOptions {
   sortBy: string;
   sortOrder: 'asc' | 'desc';
 }
-

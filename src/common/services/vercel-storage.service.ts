@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileStorageProvider, FileUploadResult, MulterFile } from '../interfaces/file-storage.interface';
+import {
+  FileStorageProvider,
+  FileUploadResult,
+  MulterFile,
+} from '../interfaces/file-storage.interface';
 
 @Injectable()
 export class VercelStorageService implements FileStorageProvider {
@@ -14,9 +18,11 @@ export class VercelStorageService implements FileStorageProvider {
     folder = 'uploads',
   ): Promise<FileUploadResult> {
     try {
-      const accessToken = this.configService.get<string>('storage.vercel.accessToken') || '';
-      const projectId = this.configService.get<string>('storage.vercel.projectId') || '';
-      
+      const accessToken =
+        this.configService.get<string>('storage.vercel.accessToken') || '';
+      const projectId =
+        this.configService.get<string>('storage.vercel.projectId') || '';
+
       // Convert file to base64
       const base64File = file.buffer.toString('base64');
       const fileName = `${folder}/${Date.now()}-${file.originalname}`;
@@ -25,7 +31,7 @@ export class VercelStorageService implements FileStorageProvider {
       const response = await fetch(`${this.vercelApiUrl}/v1/blob`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -40,7 +46,7 @@ export class VercelStorageService implements FileStorageProvider {
       }
 
       const result = await response.json();
-      
+
       return {
         url: result.url,
         key: fileName,
@@ -55,12 +61,13 @@ export class VercelStorageService implements FileStorageProvider {
 
   async deleteFile(key: string): Promise<void> {
     try {
-      const accessToken = this.configService.get<string>('storage.vercel.accessToken') || '';
-      
+      const accessToken =
+        this.configService.get<string>('storage.vercel.accessToken') || '';
+
       const response = await fetch(`${this.vercelApiUrl}/v1/blob/${key}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -78,4 +85,3 @@ export class VercelStorageService implements FileStorageProvider {
     return `https://blob.vercel-storage.com/${key}`;
   }
 }
-

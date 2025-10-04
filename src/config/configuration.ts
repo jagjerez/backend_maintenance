@@ -28,6 +28,11 @@ export default () => ({
     secret: process.env.JWT_SECRET || 'default-secret-key',
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
   },
+
+  oauth2: {
+    serverUrl:
+      process.env.OAUTH2_SERVER_URL || 'https://oauth2-application.vercel.app',
+  },
   app: {
     name: process.env.APP_NAME || 'Backend App Maintenance',
     version: process.env.APP_VERSION || '1.0.0',

@@ -59,6 +59,11 @@ export const envValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().required(),
   JWT_EXPIRES_IN: Joi.string().default('24h'),
 
+  // OAuth2 Configuration
+  OAUTH2_SERVER_URL: Joi.string().default(
+    'https://oauth2-application.vercel.app',
+  ),
+
   // App Configuration
   APP_NAME: Joi.string().default('Backend App Maintenance'),
   APP_VERSION: Joi.string().default('1.0.0'),
