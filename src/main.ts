@@ -6,10 +6,14 @@ import { AppModule } from './app.module';
 import { GlobalAuthGuard } from './auth/guards/global-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { Request, Response } from 'express';
+import { INestApplication } from '@nestjs/common';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
+let app: INestApplication;
+
+async function createNestApp(): Promise<INestApplication> {
+  if (app) return app;
+
+  app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector);
 
   // Enable CORS
@@ -76,11 +80,26 @@ async function bootstrap() {
     res.send(document);
   });
 
-  const port = configService.get<number>('port') || 3000;
-  await app.listen(port);
-
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger documentation: http://localhost:${port}/api`);
+  await app.init();
+  return app;
 }
 
-void bootstrap();
+// Solo ejecutar bootstrap en desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  void createNestApp().then(async (app) => {
+    const configService = app.get(ConfigService);
+    const port = Number(configService.get('port')) || 3000;
+    await app.listen(port);
+    console.log(`🚀 Application is running on: http://localhost:${port}`);
+    console.log(`📚 Swagger documentation: http://localhost:${port}/api`);
+  });
+}
+
+export default async function handler(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const nestApp = await createNestApp();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  nestApp.getHttpAdapter().getInstance()(req, res);
+}
